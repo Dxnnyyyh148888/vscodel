@@ -99,6 +99,7 @@ TextBox.BorderColor = BrickColor.new("Really black")
 TextBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
 TextBox.BorderSizePixel = 0
 TextBox.Position = UDim2.new(0.5, 0, 0.5, 0)
+TextBox.PlaceholderText="commandbar"
 TextBox.Size = UDim2.new(0, 100, 0, 13)
 
 local UICorner = Instance.new("UICorner")
@@ -375,6 +376,7 @@ options.Name = "options"
 local UIListLayout_4 = Instance.new("UIListLayout")
 UIListLayout_4.SortOrder = Enum.SortOrder.LayoutOrder
 
+
 local TextLabel_3 = Instance.new("TextLabel")
 TextLabel_3.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
 TextLabel_3.Text = "editor font size"
@@ -473,6 +475,39 @@ TextLabel_6.BorderColor = BrickColor.new("Really black")
 TextLabel_6.BorderColor3 = Color3.fromRGB(0, 0, 0)
 TextLabel_6.BorderSizePixel = 0
 TextLabel_6.Size = UDim2.new(1, 0, 0, 19)
+local du=Instance.new("TextLabel",options)
+du.Size=UDim2.new(1,0,0,20)
+du.BackgroundTransparency=1
+du.Text="Dock Scale"
+du.TextXAlignment=Enum.TextXAlignment.Left
+du.TextSize=10
+du.TextTransparency=0.3
+du.ZIndex=2
+du.TextColor3=Color3.new(0, 0, 0)
+du.FontFace=Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+local dockk = Instance.new("TextBox",du)
+dockk.Text = "1"
+dockk.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+dockk.TextColor = BrickColor.new("Really black")
+dockk.TextColor3 = Color3.fromRGB(0, 0, 0)
+dockk.TextSize = 10
+dockk.TextWrapped = true
+dockk.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+dockk.BackgroundTransparency = 0.9
+dockk.BorderColor = BrickColor.new("Really black")
+dockk.BorderColor3 = Color3.fromRGB(0, 0, 0)
+dockk.BorderSizePixel = 0
+dockk.Position = UDim2.new(0, 1, 1, 1)
+dockk.Size = UDim2.new(0, 16, 0, 16)
+dockk.Name = "scale"
+local doc=Instance.new("UICorner",dockk)
+doc.CornerRadius=UDim.new(1)
+
+dockk.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+local tlll=Instance.new("TextLabel",options)
+tlll.Size=UDim2.new(1, 0, 0, 20)
+tlll.Transparency=1
+
 
 local TextButton_2 = Instance.new("TextButton")
 TextButton_2.FontFace = Font.new("rbxasset://fonts/families/Jura.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
@@ -866,7 +901,7 @@ namebox.Text=""
 namebox.PlaceholderText="Name"
 namebox.BorderSizePixel=0
 namebox.FocusLost:Connect(function ()
-	if namebox.Text==""then
+	if namebox.Text=="" then
 		namebox.Visible=false
 	else
 		writefile('vsscripts/'..namebox.Text..".lua", codebox.Text)
@@ -882,6 +917,20 @@ dock.Position=UDim2.new(0.5, 0, 1, 0)
 dock.BackgroundColor3=Color3.new(1, 1, 1)
 dock.BackgroundTransparency=0.05
 dock.AnchorPoint=Vector2.new(0.5, 0)
+local uis2=Instance.new("UIScale",dock)
+if not isfile('vssettings//dsc.txt') then
+writefile('vssettings//dsc.txt','1')
+end
+dockk.FocusLost:Connect(function()
+	if dockk.Text=="" or dockk.Text=="0" then
+		dockk.Text=readfile('vssettings//dsc.txt')
+	else
+		uis2.Scale=tonumber(dockk.text)
+		writefile('vssettings//dsc.txt', tostring(uis2.Scale))
+	end
+end)
+uis2.Scale=tonumber(readfile('vssettings//dsc.txt'))
+
 local edge=Instance.new("TextButton",dock)
 edge.Size=UDim2.new(0, 50, 0, 10)
 edge.Position=UDim2.new(0.5, 0, 0, -2)
@@ -958,9 +1007,12 @@ maximize.MouseButton1Click:Connect(function ()
 end)
 scale.FocusLost:Connect(function ()
 if maximized==false then
+	if scale.Text==""or scale.Text=="0" then
+	scale.Text="?"
+	else
 	uis.Scale=tonumber(scale.Text)
 	writefile('vssettings//scale.txt',tostring(uis.Scale))
-end
+    end
 end)
 local b=Instance.new("ImageButton",ScreenGui)
 b.Size=UDim2.new(0, 20, 0, 20)
@@ -1116,4 +1168,28 @@ b4.MouseButton1Click:Connect(function ()
 end)
 b5.MouseButton1Click:Connect(function ()
 	game:GetService("StarterGui"):SetCore("DevConsoleVisible",true)
+end)
+TextBox.FocusLost:Connect(function()
+	TextBox.Text="commandbar"
+	if TextBox.Text:lower()=="cmds"or TextBox.Text:lower()=="commands" then
+		game:GetService("StarterGui"):SetCore("DevConsoleVisible",true)
+		print([[commands:
+		cmds\commands-shows commands
+		clear\cl-clears codebox
+		paste\p-pastes text from clipboard to codebox
+		runclipboard\rc-executes script from your clipboard
+		console\c-opens developer console
+		reset-resets your character
+		rejoin\rj-rejoins]])
+	elseif TextBox.Text:lower()=="console" or TextBox.Text:lower()=="c" then
+		game:GetService("StarterGui"):SetCore("DevConsoleVisible",true)
+	elseif TextBox.Text:lower()=="clear" or TextBox.Text:lower()=="cl" then
+		codebox.Text=""
+	elseif TextBox.Text:lower()=="runclipboard" or TextBox.Text:lower()=="rc" then
+		loadstring(getclipboard())()
+	elseif TextBox.Text:lower()==reset then
+		game.Players.LocalPlayer.Character.Humanoid.Health=0
+	elseif TextBox.Text:lower()=="paste" or TextBox.Text:lower()=="p"then
+		codebox.Text=getclipboard()
+	end
 end)
