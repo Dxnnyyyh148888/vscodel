@@ -1,9 +1,12 @@
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.ScreenInsets = Enum.ScreenInsets.None
-ScreenGui.DisplayOrder=9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+ScreenGui.DisplayOrder=9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
+local holder=Instance.new("Frame",ScreenGui)
+holder.Size=UDim2.new(0, 0, 0, 0)
+holder.AnchorPoint=Vector2.new(0.5, 0.5)
+holder.BackgroundTransparency=1
 local Frame = Instance.new("Frame")
 Frame.AnchorPoint = Vector2.new(0.5, 0.5)
 Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -193,12 +196,12 @@ codebox.TextColor3 = Color3.fromRGB(0, 0, 0)
 codebox.TextSize = 14
 codebox.TextXAlignment = Enum.TextXAlignment.Left
 codebox.TextYAlignment = Enum.TextYAlignment.Top
-codebox.AnchorPoint = Vector2.new(1, 0)
+codebox.AnchorPoint = Vector2.new(0, 0)
 codebox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 codebox.BorderColor = BrickColor.new("Really black")
 codebox.BorderColor3 = Color3.fromRGB(0, 0, 0)
 codebox.BorderSizePixel = 0
-codebox.Position = UDim2.new(1, 0, 0, 20)
+codebox.Position = UDim2.new(0,130, 0, 20)
 codebox.Size = UDim2.new(0, 200, 0, 130)  -- Уменьшил ширину codebox, чтобы подогнать под новую ширину scripts
 codebox.ZIndex = 0
 codebox.Name = "codebox"
@@ -715,6 +718,9 @@ end
 if not isfile('vssettings//scale.txt') then
 	writefile('vssettings//scale.txt', '1')
 end
+if not isfolder("vsscripts") then
+	makefolder('vsscripts')
+end
 codebox.TextSize=tonumber(readfile('vssettings//font.txt'))
 size.Text=readfile('vssettings//font.txt')
 codebox.MultiLine=true
@@ -725,10 +731,6 @@ size.FocusLost:Connect(function ()
 
 end)
 local uis=Instance.new("UIScale",Frame)
-scale.FocusLost:Connect(function ()
-	uis.Scale=tonumber(scale.Text)
-	writefile('vssettings//scale.txt',tostring(uis.Scale))
-end)
 scale.TextTransparency=0
 uis.Scale=tonumber(readfile('vssettings//scale.txt'))
 scale.Text=readfile('vssettings//scale.txt')
@@ -742,7 +744,7 @@ local namebox=Instance.new("TextBox",save)
 namebox.Size=UDim2.new(2, 0, 1, 0)
 namebox.Position=UDim2.new(1, 0, 1, 0)
 namebox.AnchorPoint=Vector2.new(1, 0)
-namebox.BackgroundColor3=Color3.new(1, 1, 1)
+namebox.BackgroundColor3=Color3.new(0.8, 0.8, 0.8)
 namebox.Visible=false
 namebox.Text = "script_name"  -- Placeholder для удобства
 namebox.TextColor3 = Color3.fromRGB(0, 0, 0)
@@ -752,6 +754,7 @@ save.MouseButton1Click:Connect(function ()
 	namebox.Visible=true
 	namebox:CaptureFocus()  -- Исправил опечатку
 end)
+local opened=true
 local function makebutt(name)
     local item = Instance.new("Frame")
     item.Size = UDim2.new(1, 0, 0, 35)
@@ -773,7 +776,7 @@ local function makebutt(name)
     local run = Instance.new("TextButton")
     run.Size = UDim2.new(0.3, 0, 0.5, 0)
     run.Position = UDim2.new(0.025, 0, 0.5, 0)
-    run.Text = "Open"
+    run.Text = "Select"
     run.TextColor3 = Color3.new(0)
     run.BackgroundTransparency=0.8  -- Исправил опечатку
     run.TextTransparency = 0.5
@@ -783,6 +786,7 @@ local function makebutt(name)
 	runc.CornerRadius=UDim.new(0, 3)
     
     run.MouseButton1Click:Connect(function()
+	if opened==true then
         local path = "vsscripts/" .. name  -- Унифицировал case
         if isfile(path) then
             local success, result = pcall(function()
@@ -792,6 +796,17 @@ local function makebutt(name)
                 warn("Ошибка выполнения: " .. tostring(result))
             end
         end
+	else
+        local path = "vsscripts/" .. name  -- Унифицировал case
+        if isfile(path) then
+            local success, result = pcall(function()
+                loadstring(readfile(path))()
+            end)
+            if not success then
+                warn("Ошибка выполнения: " .. tostring(result))
+            end
+        end
+	end
     end)
     
     local copy2 = run:Clone()
@@ -847,11 +862,14 @@ local function loadScripts()
         end
     end
 end
+namebox.Text=""
+namebox.PlaceholderText="Name"
+namebox.BorderSizePixel=0
 namebox.FocusLost:Connect(function ()
 	if namebox.Text==""then
 		namebox.Visible=false
 	else
-		writefile('vsscripts/'..namebox.Text, codebox.Text)
+		writefile('vsscripts/'..namebox.Text..".lua", codebox.Text)
 		loadScripts()
 		namebox.Visible=false
 	end
@@ -876,10 +894,13 @@ ec.CornerRadius=UDim.new(1)
 local dc=Instance.new("UICorner",dock)
 dc.CornerRadius=UDim.new(0,12)
 local ts=game:GetService("TweenService")
+local linear=TweenInfo.new(0.1,Enum.EasingStyle.Quint,Enum.EasingDirection.InOut)
+
 local quint=TweenInfo.new(0.5,Enum.EasingStyle.Quint,Enum.EasingDirection.Out)
 dock.Visible=false
 minimize.MouseButton1Click:Connect(function ()
 	Frame.Visible=false
+	edge.Visible=true
 	dock.Visible=true
 	edge.Position=UDim2.new(0.5, 0,0,-50)
 	edge.Size=UDim2.new(0, 0, 0, 0)
@@ -892,4 +913,207 @@ edge.MouseButton1Down:Connect(function ()
 	else
 	ts:Create(dock,quint,{AnchorPoint=Vector2.new(0.5, 0)}):Play()
 	end
+end)
+run.Parent=topbar
+save.Parent=topbar
+run.Position=UDim2.new(1, -16, 1, 2)
+save.Position=UDim2.new(1, 0, 1, 2)
+local maximized=false
+maximize.MouseButton1Click:Connect(function ()
+	if maximized==false then
+		codebox.Size=UDim2.new(1, 0, 1, 0)
+		maximized=true
+		uis.Scale=1
+		topbar.ZIndex=0
+		Frame.Draggable=false
+		tabs.Size=UDim2.new(0, 25, 1)
+		UIListLayout.VerticalAlignment=Enum.VerticalAlignment.Center
+		ts:Create(Frame,quint,{Size=UDim2.new(1, 0, 1, 0)}):Play()
+		tabs.Position=UDim2.new(0, 0, 0, 0)
+		scripts.Size=UDim2.new(0, 100, 1, 0)
+		scripts.Position=UDim2.new(0, 25, 0, 0)
+		scriptblox.Position=UDim2.new(0, 25, 0, 0)
+		info_2.Position=UDim2.new(0, 25, 0)
+		options.Position=UDim2.new(0, 25, 0, 0)
+		scriptblox.Size=UDim2.new(0, 100, 1, 0)
+		ScrollingFrame.Size=UDim2.new(0.99, 0, 1, 0)
+		info_2.Size=UDim2.new(0, 100, 1, 0)
+		options.Size=UDim2.new(0, 100, 1, 0)
+		ts:Create(Frame,quint,{Position=UDim2.new(0.5, 0, 0.5)}):Play()
+	else
+		codebox.Size=UDim2.new(0,200,0,130)
+		tabs.Position=UDim2.new(0, 0, 0, 20)
+		UIListLayout.VerticalAlignment=Enum.VerticalAlignment.Top
+		scripts.Position=UDim2.new(0, 25, 0, 20)
+		options.Position=UDim2.new(0, 25, 0, 20)
+		scriptblox.Position=UDim2.new(0, 25, 0, 20)
+		info_2.Position=UDim2.new(0, 25, 20, 20)
+		maximized=false
+		Frame.Draggable=true
+		topbar.ZIndex=5
+		ts:Create(Frame,quint,{Position=UDim2.new(0.5, 0, 0.5, 0)}):Play()
+		ts:Create(Frame,quint,{Size=UDim2.new(0,330,0,150)}):Play()
+		ts:Create(uis,quint,{Scale=tonumber(readfile('vssettings//scale.txt'))}):Play()
+	end
+end)
+scale.FocusLost:Connect(function ()
+if maximized==false then
+	uis.Scale=tonumber(scale.Text)
+	writefile('vssettings//scale.txt',tostring(uis.Scale))
+end
+end)
+local b=Instance.new("ImageButton",ScreenGui)
+b.Size=UDim2.new(0, 20, 0, 20)
+b.Position=UDim2.new(0.5, 0, 0.2, 0)
+b.AnchorPoint=Vector2.new(0.5, 0.5)
+b.BackgroundTransparency=1
+b.Image='rbxassetid://92263503189267'
+holder.Size=UDim2.new(0, 100, 0, 100)
+b.Visible=false
+local mimi=true
+local set=false
+local function open()
+	opened=true
+	scripts.Parent=Frame
+	scripts.AnchorPoint=Vector2.new(0, 0)
+	scriptblox.Parent=Frame
+	scriptblox.AnchorPoint=Vector2.new(0, 0)
+	if set==false then
+	scriptblox.Visible=false
+	scripts.Visible=true
+	options.Visible=false
+	info_2.Visible=false
+	else
+	set=false
+	scriptblox.Visible=false
+	scripts.Visible=false
+	options.Visible=true
+	info_2.Visible=false
+	end
+	b.Visible=false
+	if maximized==false then
+	scripts.Position=UDim2.new(0, 25, 0, 20)
+	scriptblox.Position=UDim2.new(0, 25, 0, 20)
+
+	Frame.Visible=true
+	if mimi==true then
+	holder.Position=Frame.Position
+	end
+	Frame.Parent=holder
+	Frame.Position=UDim2.new(0.5, 0, 2, 0)
+	mimi=false
+	ts:Create(Frame,linear,{Size=UDim2.new(0, 360, 0, 150)}):Play()
+	ts:Create(Frame,linear,{Position=UDim2.new(0.5, 0, 1, 0)}):Play()
+	wait(0.05)
+	ts:Create(Frame,quint,{Position=UDim2.new(0.5,0,0.5)}):Play()
+	ts:Create(Frame,quint,{Size=UDim2.new(0, 330, 0, 150)}):Play()
+	wait(0.5)
+	Frame.Position=holder.Position
+	mimi=true
+	Frame.Parent=ScreenGui
+	else
+	scripts.Position=UDim2.new(0, 25, 0, 0)
+	scripts.Size=UDim2.new(0, 100, 1, 0)
+	scriptblox.Position=UDim2.new(0, 25, 0, 0)
+	scriptblox.Size=UDim2.new(0, 100, 1, 0)
+
+	Frame.Visible=true
+	end
+end
+b.MouseButton1Click:Connect(function ()
+open()
+end)
+b.Active=true
+b.Draggable=true
+b.MouseButton1Down:Connect(function ()
+	ts:Create(b,quint,{Size=UDim2.new(0, 30, 0, 30)}):Play()
+end)
+b.MouseLeave:Connect(function ()
+	ts:Create(b,quint,{Size=UDim2.new(0, 20, 0, 20)}):Play()
+end)
+close.MouseButton1Click:Connect(function ()
+	b.Visible=true
+	Frame.Visible=false
+end)
+local i=Instance.new("ImageLabel",dock)
+i.Size=UDim2.new(0, 25, 0, 25)
+i.Position=UDim2.new(0, 5, 1, -5)
+i.Image=b.Image
+i.AnchorPoint=Vector2.new(0, 1)
+i.BackgroundTransparency=1
+local b1=Instance.new("ImageButton",dock)
+b1.Size=i.Size
+b1.Position=UDim2.new(0, 40, 1, -5)
+b1.BackgroundTransparency=0.8
+b1.BackgroundColor3=Color3.fromRGB(50, 100, 50)
+b1.AnchorPoint=Vector2.new(0, 1)
+local b1c=Instance.new("UICorner",b1)
+local b2=b1:Clone();b2.Parent=dock
+b2.Position=UDim2.new(0, 70, 1, -5)
+b2.Image="rbxassetid://89124041618229"
+local im=Instance.new("ImageLabel",b1)
+im.BackgroundTransparency=1
+im.Size=UDim2.new(0.8, 0, 0.8, 0)
+im.Position=UDim2.new(0.1, 0, 0.1, 0)
+im.Image='rbxassetid://127862782406161'
+local b3=b2:Clone();b3.Parent=dock
+b3.Position=UDim2.new(0, 100, 1, -5)
+b3.Image=search.Image
+local b4=b3:Clone();b4.Parent=dock
+b4.Position=UDim2.new(0, 130, 1, -5)
+b4.Image=settings.Image
+local b5=Instance.new("TextButton",dock)
+b5.Size=UDim2.new(0, 25, 0, 25)
+b5.Position=UDim2.new(0, 160, 1, -5)
+b5.BackgroundColor3=b2.BackgroundColor3
+b5.BackgroundTransparency=0.8
+b5.Text=">_"
+b5.Font=Enum.Font.DenkOne
+b5.TextColor3=Color3.new(1, 1, 1)
+b5.TextSize=18
+b5.AnchorPoint=Vector2.new(0, 1)
+local b5c=Instance.new("UICorner",b5)
+b1.MouseButton1Click:Connect(function ()
+	ts:Create(dock,quint,{AnchorPoint=Vector2.new(0.5)}):Play()
+	edge.Visible=false
+	open()
+	dock.Visible=false
+end)
+b2.MouseButton1Click:Connect(function ()
+if scripts.Parent==Frame then
+	opened=false
+	scripts.Visible=true
+	b2.BackgroundColor3=Color3.new(0.2,0.8,0.2)
+	scripts.Parent=ScreenGui
+	scripts.Size=UDim2.new(0, 100, 0, 130)
+	scripts.Position=UDim2.new(0.5, 0, 0.5, 0)
+	scripts.AnchorPoint=Vector2.new(0.5, 0.5)
+else
+	scripts.Parent=Frame
+	b2.BackgroundColor3=b1.BackgroundColor3
+end
+end)
+b3.MouseButton1Click:Connect(function ()
+if scriptblox.Parent==Frame then
+	opened=false
+	scriptblox.Visible=true
+	b3.BackgroundColor3=Color3.new(0.2,0.8,0.2)
+	scriptblox.Parent=ScreenGui
+	scriptblox.Size=UDim2.new(0, 100, 0, 130)
+	scriptblox.Position=UDim2.new(0.5, 0, 0.5, 0)
+	scriptblox.AnchorPoint=Vector2.new(0.5, 0.5)
+else
+	scriptblox.Parent=Frame
+	b3.BackgroundColor3=b1.BackgroundColor3
+end
+end)
+b4.MouseButton1Click:Connect(function ()
+	set=true
+	ts:Create(dock,quint,{AnchorPoint=Vector2.new(0.5)}):Play()
+	edge.Visible=false
+	open()
+	dock.Visible=false
+end)
+b5.MouseButton1Click:Connect(function ()
+	game:GetService("StarterGui"):SetCore("DevConsoleVisible",true)
 end)
