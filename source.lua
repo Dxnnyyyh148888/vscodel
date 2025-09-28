@@ -1013,6 +1013,7 @@ if maximized==false then
 	uis.Scale=tonumber(scale.Text)
 	writefile('vssettings//scale.txt',tostring(uis.Scale))
     end
+end
 end)
 local b=Instance.new("ImageButton",ScreenGui)
 b.Size=UDim2.new(0, 20, 0, 20)
