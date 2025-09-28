@@ -1171,7 +1171,6 @@ b5.MouseButton1Click:Connect(function ()
 	game:GetService("StarterGui"):SetCore("DevConsoleVisible",true)
 end)
 TextBox.FocusLost:Connect(function()
-	TextBox.Text="commandbar"
 	if TextBox.Text:lower()=="cmds"or TextBox.Text:lower()=="commands" then
 		game:GetService("StarterGui"):SetCore("DevConsoleVisible",true)
 		print([[commands:
@@ -1193,4 +1192,5 @@ TextBox.FocusLost:Connect(function()
 	elseif TextBox.Text:lower()=="paste" or TextBox.Text:lower()=="p"then
 		codebox.Text=getclipboard()
 	end
+	TextBox.Text="commandbar"
 end)
