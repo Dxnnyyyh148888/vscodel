@@ -508,7 +508,7 @@ TextButton_3.Size = UDim2.new(0, 40, 0, 20)
 local UICorner_7 = Instance.new("UICorner")
 UICorner_7.CornerRadius = UDim.new(0, 1)
 
-ScreenGui.Parent = game.Players.LocalPlayer.PlayerGui
+ScreenGui.Parent = game.CoreGui
 Frame.Parent = ScreenGui
 topbar.Parent = Frame
 ImageLabel.Parent = topbar
